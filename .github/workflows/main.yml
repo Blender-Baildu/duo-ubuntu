@@ -1,0 +1,40 @@
+name: Setup VIRTUAL EDU WEBSITE
+
+on:
+  workflow_dispatch:
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Update packages
+        run: |
+          sudo apt update -y
+          sudo apt install qemu-kvm cpulimit wget -y
+
+      - name: Install
+        run: |
+          curl -fsSL https://tailscale.com/install.sh | sh
+          sudo tailscaled &
+          sleep 5
+          sudo tailscale up
+
+      - name: Install Server
+        run: |
+          sudo apt update
+          sudo apt install openssh-server -y
+          sudo service ssh start
+          sudo service ssh status
+          sudo service ssh restart
+
+      - name: Create group
+        run: |
+          sudo adduser --disabled-password --gecos "" blender
+          echo "blender:123456Hi" | sudo chpasswd
+          sudo usermod -aG sudo blender
+
+      - name: Keep Alive✅
+        run: |
+          echo "Runner is now alive and waiting for SSH/Tailscale connection..."
+          while true; do sleep 60; done
